@@ -8,28 +8,83 @@ const GamePage = () => {
 
     const handleNext = () => setStep(prev => prev + 1);
 
-    // --- שלב 1: גרור עיגול ---
     const Step1 = () => {
         const [dropped, setDropped] = useState(false);
+        const [position, setPosition] = useState({ x: 270, y: 190 }); // מיקום התחלתי בתוך הקונטיינר
+        const [touchOffset, setTouchOffset] = useState({ x: 0, y: 0 });
+        const containerRef = React.useRef(null);
+        const dropZoneRef = React.useRef(null);
+
+        // --- מחשב (drag/drop רגיל)
         const handleDrop = (e) => {
             e.preventDefault();
             setDropped(true);
         };
+
+        // --- מובייל (touch)
+        const handleTouchStart = (e) => {
+            const touch = e.touches[0];
+            const containerRect = containerRef.current.getBoundingClientRect();
+            setTouchOffset({
+                x: touch.clientX - containerRect.left - position.x,
+                y: touch.clientY - containerRect.top - position.y,
+            });
+        };
+
+        const handleTouchMove = (e) => {
+            const touch = e.touches[0];
+            const containerRect = containerRef.current.getBoundingClientRect();
+            setPosition({
+                x: touch.clientX - containerRect.left - touchOffset.x,
+                y: touch.clientY - containerRect.top - touchOffset.y,
+            });
+        };
+
+        const handleTouchEnd = () => {
+            const dropZone = dropZoneRef.current;
+            const containerRect = containerRef.current.getBoundingClientRect();
+            if (dropZone) {
+                const dzRect = dropZone.getBoundingClientRect();
+                const centerX = position.x + 25 + containerRect.left;
+                const centerY = position.y + 25 + containerRect.top;
+                if (
+                    centerX > dzRect.left &&
+                    centerX < dzRect.right &&
+                    centerY > dzRect.top &&
+                    centerY < dzRect.bottom
+                ) {
+                    setDropped(true);
+                }
+            }
+        };
+
         return (
-            <div className="task-container">
+            <div className="task-container" ref={containerRef} style={{ position: 'relative' }}>
                 <h3>משימה 1: גרור את העיגול</h3>
                 <p>גרור את העיגול הצהוב אל העיגול הגדול 🎯</p>
-                <div className="drop-zone" onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
+                <div
+                    className="drop-zone"
+                    ref={dropZoneRef}
+                    onDrop={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                >
                     {dropped && <div className="circle success"></div>}
                 </div>
-                {!dropped && <div className="circle draggable" draggable></div>}
-
-                <div className="navigation-buttons">
-                    <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                        ➡️ קודם
-                    </button>
-                    {dropped && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
-                </div>
+                {!dropped && (
+                    <div
+                        className="circle draggable"
+                        draggable
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        style={{
+                            position: 'absolute',
+                            left: position.x,
+                            top: position.y,
+                        }}
+                    ></div>
+                )}
+                {dropped && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
             </div>
         );
     };
@@ -42,27 +97,34 @@ const GamePage = () => {
         const handleClick = () => {
             const newCount = count + 1;
             setCount(newCount);
-            if (newCount === 5) setCelebrate(true);
+            if (newCount === 5) {
+                setCelebrate(true);
+            }
         };
 
         return (
             <div className="task-container">
                 <h3>משימה 2: לחץ 5 פעמים</h3>
                 <p>לחץ על הכפתור 5 פעמים!</p>
+
                 <button
                     className={`task-btn-circle ${celebrate ? 'celebrate-btn' : ''}`}
                     onClick={handleClick}
                 />
+
+                {/* ספירה ויזואלית */}
                 <div className="click-counter">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <span key={i} className={`dot ${i < count ? 'active' : ''}`}></span>
                     ))}
                 </div>
+
                 {celebrate && (
                     <div className="celebration-animation">
                         🎉 כל הכבוד! סיימת את המשימה! 🎉
                     </div>
                 )}
+
                 <div className="navigation-buttons">
                     <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
                         ➡️ קודם
@@ -91,12 +153,7 @@ const GamePage = () => {
                         />
                     ))}
                 </div>
-                <div className="navigation-buttons">
-                    <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                        ➡️ קודם
-                    </button>
-                    {selected === correctColor && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
-                </div>
+                {selected === correctColor && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
             </div>
         );
     };
@@ -108,28 +165,81 @@ const GamePage = () => {
             { emoji: '🍌', color: '#f1c40f' },
             { emoji: '🍇', color: '#8e44ad' }
         ];
-        const [placed, setPlaced] = useState([false, false, false]);
-        const [dragging, setDragging] = useState(null);
 
-        const handleDragStart = (index) => setDragging(index);
+        const [placed, setPlaced] = useState([false, false, false]);
+        const [draggingIndex, setDraggingIndex] = useState(null);
+const [positions, setPositions] = useState(items.map((_, i) => ({ x: 80 + i * 80, y: 400 })));
+        const [touchOffset, setTouchOffset] = useState({ x: 0, y: 0 });
+        const containerRef = React.useRef(null);
+        const dropRefs = React.useRef([]);
+
+        // --- מחשב
+        const handleDragStart = (index) => setDraggingIndex(index);
         const handleDrop = (i) => {
-            if (dragging === i) {
+            if (draggingIndex === i) {
                 const newPlaced = [...placed];
                 newPlaced[i] = true;
                 setPlaced(newPlaced);
             }
-            setDragging(null);
+            setDraggingIndex(null);
+        };
+
+        // --- מובייל
+        const handleTouchStart = (e, index) => {
+            const touch = e.touches[0];
+            const containerRect = containerRef.current.getBoundingClientRect();
+            setDraggingIndex(index);
+            setTouchOffset({
+                x: touch.clientX - containerRect.left - positions[index].x,
+                y: touch.clientY - containerRect.top - positions[index].y,
+            });
+        };
+
+        const handleTouchMove = (e) => {
+            if (draggingIndex === null) return;
+            const touch = e.touches[0];
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const newPositions = [...positions];
+            newPositions[draggingIndex] = {
+                x: touch.clientX - containerRect.left - touchOffset.x,
+                y: touch.clientY - containerRect.top - touchOffset.y,
+            };
+            setPositions(newPositions);
+        };
+
+        const handleTouchEnd = () => {
+            if (draggingIndex === null) return;
+            const dropZone = dropRefs.current[draggingIndex];
+            const containerRect = containerRef.current.getBoundingClientRect();
+            if (dropZone) {
+                const dzRect = dropZone.getBoundingClientRect();
+                const centerX = positions[draggingIndex].x + 25 + containerRect.left;
+                const centerY = positions[draggingIndex].y + 25 + containerRect.top;
+                if (
+                    centerX > dzRect.left &&
+                    centerX < dzRect.right &&
+                    centerY > dzRect.top &&
+                    centerY < dzRect.bottom
+                ) {
+                    const newPlaced = [...placed];
+                    newPlaced[draggingIndex] = true;
+                    setPlaced(newPlaced);
+                }
+            }
+            setDraggingIndex(null);
         };
 
         return (
-            <div className="task-container">
+            <div className="task-container" ref={containerRef} style={{ position: 'relative' }}>
                 <h3>משימה 4: גרור פירות למקום הנכון</h3>
                 <p>גרור את הפירות אל העיגול בצבע המתאים 🍎🍌🍇</p>
+
                 <div className="drop-row">
                     {items.map((item, i) => (
                         <div
                             key={i}
                             className="drop-zone small"
+                            ref={(el) => (dropRefs.current[i] = el)}
                             style={{ borderColor: item.color }}
                             onDrop={() => handleDrop(i)}
                             onDragOver={(e) => e.preventDefault()}
@@ -138,6 +248,7 @@ const GamePage = () => {
                         </div>
                     ))}
                 </div>
+
                 <div className="drag-row">
                     {items.map((item, i) => !placed[i] && (
                         <div
@@ -145,21 +256,26 @@ const GamePage = () => {
                             className="draggable-item"
                             draggable
                             onDragStart={() => handleDragStart(i)}
-                            style={{ backgroundColor: item.color }}
+                            onTouchStart={(e) => handleTouchStart(e, i)}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            style={{
+                                backgroundColor: item.color,
+                                position: 'absolute',
+                                left: positions[i].x,
+                                top: positions[i].y,
+                            }}
                         >
                             {item.emoji}
                         </div>
                     ))}
                 </div>
-                <div className="navigation-buttons">
-                    <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                        ➡️ קודם
-                    </button>
-                    {placed.every(Boolean) && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
-                </div>
+
+                {placed.every(Boolean) && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
             </div>
         );
     };
+
 
     // --- שלב 5: תופסת את הכדור עם אנימציה מתוחכמת ---
     const Step5 = () => {
@@ -180,12 +296,7 @@ const GamePage = () => {
                     style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
                     onClick={handleClick}
                 ></div>
-                <div className="navigation-buttons">
-                    <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                        ➡️ קודם
-                    </button>
-                    {caught && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
-                </div>
+                {caught && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
             </div>
         );
     };
@@ -195,14 +306,9 @@ const GamePage = () => {
         <div className="task-container">
             <h3>משימה 6: סיום</h3>
             <p>🎉 כל הכבוד! סיימת את המשחק! 🎉</p>
-            <div className="navigation-buttons">
-                <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                    ➡️ קודם
-                </button>
-                <button className="home-btn" onClick={() => navigate('/')}>
-                    חזור לבית
-                </button>
-            </div>
+            <button className="home-btn" onClick={() => navigate('/')}>
+                חזור לבית
+            </button>
         </div>
     );
 
