@@ -10,7 +10,7 @@ const GamePage = () => {
 
     const Step1 = () => {
         const [dropped, setDropped] = useState(false);
-        const [position, setPosition] = useState({ x: 270, y: 190 }); // מיקום התחלתי בתוך הקונטיינר
+        const [position, setPosition] = useState({ x: 250, y: 190 }); // מיקום התחלתי בתוך הקונטיינר
         const [touchOffset, setTouchOffset] = useState({ x: 0, y: 0 });
         const containerRef = React.useRef(null);
         const dropZoneRef = React.useRef(null);
@@ -59,33 +59,37 @@ const GamePage = () => {
         };
 
         return (
-            <div className="task-container" ref={containerRef} style={{ position: 'relative' }}>
-                <h3>משימה 1: גרור את העיגול</h3>
-                <p>גרור את העיגול הצהוב אל העיגול הגדול 🎯</p>
-                <div
-                    className="drop-zone"
-                    ref={dropZoneRef}
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                >
-                    {dropped && <div className="circle success"></div>}
-                </div>
-                {!dropped && (
+            <div className='GamePage'>
+                <div className="task-container" ref={containerRef} style={{ position: 'relative' }}>
+                    <h3>משימה 1: גרור את העיגול</h3>
+                    <p>גרור את העיגול הצהוב אל העיגול הגדול 🎯</p>
                     <div
-                        className="circle draggable"
-                        draggable
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        style={{
-                            position: 'absolute',
-                            left: position.x,
-                            top: position.y,
-                        }}
-                    ></div>
-                )}
-                {dropped && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
+                        className="drop-zone"
+                        ref={dropZoneRef}
+                        onDrop={handleDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                    >
+                        {dropped && <div className="circle success"></div>}
+                    </div>
+                    {!dropped && (
+                        <div
+                            className="circle draggable"
+                            draggable
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            style={{
+                                position: 'absolute',
+                                left: position.x,
+                                top: position.y,
+                            }}
+                        ></div>
+                    )}
+                    {dropped && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
+                </div>
+
             </div>
+
         );
     };
 
@@ -103,35 +107,39 @@ const GamePage = () => {
         };
 
         return (
-            <div className="task-container">
-                <h3>משימה 2: לחץ 5 פעמים</h3>
-                <p>לחץ על הכפתור 5 פעמים!</p>
+            <div className='GamePage'>
 
-                <button
-                    className={`task-btn-circle ${celebrate ? 'celebrate-btn' : ''}`}
-                    onClick={handleClick}
-                />
+                <div className="task-container">
+                    <h3>משימה 2: לחץ 5 פעמים</h3>
+                    <p>לחץ על הכפתור 5 פעמים!</p>
 
-                {/* ספירה ויזואלית */}
-                <div className="click-counter">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <span key={i} className={`dot ${i < count ? 'active' : ''}`}></span>
-                    ))}
-                </div>
+                    <button
+                        className={`task-btn-circle ${celebrate ? 'celebrate-btn' : ''}`}
+                        onClick={handleClick}
+                    />
 
-                {celebrate && (
-                    <div className="celebration-animation">
-                        🎉 כל הכבוד! סיימת את המשימה! 🎉
+                    {/* ספירה ויזואלית */}
+                    <div className="click-counter">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i} className={`dot ${i < count ? 'active' : ''}`}></span>
+                        ))}
                     </div>
-                )}
 
-                <div className="navigation-buttons">
-                    <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                        ➡️ קודם
-                    </button>
-                    {celebrate && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
+                    {celebrate && (
+                        <div className="celebration-animation">
+                            🎉 כל הכבוד! סיימת את המשימה! 🎉
+                        </div>
+                    )}
+
+                    <div className="navigation-buttons">
+                        <button className="nav-btn" onClick={() => setStep(step - 1)} disabled={step === 0}>
+                            ➡️ קודם
+                        </button>
+                        {celebrate && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
+                    </div>
                 </div>
             </div>
+
         );
     };
 
@@ -141,20 +149,24 @@ const GamePage = () => {
         const [selected, setSelected] = useState(null);
 
         return (
-            <div className="task-container">
-                <h3>משימה 3: בחר צבע</h3>
-                <p>בחר את הצבע הירוק ✅</p>
-                <div className="color-options">
-                    {['red', 'blue', 'green', 'yellow'].map(color => (
-                        <div
-                            key={color}
-                            className={`color-circle ${color} ${selected === color ? 'selected' : ''}`}
-                            onClick={() => setSelected(color)}
-                        />
-                    ))}
+            <div className='GamePage'>
+
+                <div className="task-container">
+                    <h3>משימה 3: בחר צבע</h3>
+                    <p>בחר את הצבע הירוק ✅</p>
+                    <div className="color-options">
+                        {['red', 'blue', 'green', 'yellow'].map(color => (
+                            <div
+                                key={color}
+                                className={`color-circle ${color} ${selected === color ? 'selected' : ''}`}
+                                onClick={() => setSelected(color)}
+                            />
+                        ))}
+                    </div>
+                    {selected === correctColor && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
                 </div>
-                {selected === correctColor && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
             </div>
+
         );
     };
 
@@ -168,7 +180,7 @@ const GamePage = () => {
 
         const [placed, setPlaced] = useState([false, false, false]);
         const [draggingIndex, setDraggingIndex] = useState(null);
-const [positions, setPositions] = useState(items.map((_, i) => ({ x: 80 + i * 80, y: 400 })));
+        const [positions, setPositions] = useState(items.map((_, i) => ({ x: 55 + i * 80, y: 390 })));
         const [touchOffset, setTouchOffset] = useState({ x: 0, y: 0 });
         const containerRef = React.useRef(null);
         const dropRefs = React.useRef([]);
@@ -230,49 +242,53 @@ const [positions, setPositions] = useState(items.map((_, i) => ({ x: 80 + i * 80
         };
 
         return (
-            <div className="task-container" ref={containerRef} style={{ position: 'relative' }}>
-                <h3>משימה 4: גרור פירות למקום הנכון</h3>
-                <p>גרור את הפירות אל העיגול בצבע המתאים 🍎🍌🍇</p>
+            <div className='GamePage'>
 
-                <div className="drop-row">
-                    {items.map((item, i) => (
-                        <div
-                            key={i}
-                            className="drop-zone small"
-                            ref={(el) => (dropRefs.current[i] = el)}
-                            style={{ borderColor: item.color }}
-                            onDrop={() => handleDrop(i)}
-                            onDragOver={(e) => e.preventDefault()}
-                        >
-                            {placed[i] ? item.emoji : null}
-                        </div>
-                    ))}
+                <div className="task-container" ref={containerRef} style={{ position: 'relative' }}>
+                    <h3>משימה 4: גרור פירות למקום הנכון</h3>
+                    <p>גרור את הפירות אל העיגול בצבע המתאים 🍎🍌🍇</p>
+
+                    <div className="drop-row">
+                        {items.map((item, i) => (
+                            <div
+                                key={i}
+                                className="drop-zone small"
+                                ref={(el) => (dropRefs.current[i] = el)}
+                                style={{ borderColor: item.color }}
+                                onDrop={() => handleDrop(i)}
+                                onDragOver={(e) => e.preventDefault()}
+                            >
+                                {placed[i] ? item.emoji : null}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="drag-row">
+                        {items.map((item, i) => !placed[i] && (
+                            <div
+                                key={i}
+                                className="draggable-item"
+                                draggable
+                                onDragStart={() => handleDragStart(i)}
+                                onTouchStart={(e) => handleTouchStart(e, i)}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
+                                style={{
+                                    backgroundColor: item.color,
+                                    position: 'absolute',
+                                    left: positions[i].x,
+                                    top: positions[i].y,
+                                }}
+                            >
+                                {item.emoji}
+                            </div>
+                        ))}
+                    </div>
+
+                    {placed.every(Boolean) && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
                 </div>
-
-                <div className="drag-row">
-                    {items.map((item, i) => !placed[i] && (
-                        <div
-                            key={i}
-                            className="draggable-item"
-                            draggable
-                            onDragStart={() => handleDragStart(i)}
-                            onTouchStart={(e) => handleTouchStart(e, i)}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                            style={{
-                                backgroundColor: item.color,
-                                position: 'absolute',
-                                left: positions[i].x,
-                                top: positions[i].y,
-                            }}
-                        >
-                            {item.emoji}
-                        </div>
-                    ))}
-                </div>
-
-                {placed.every(Boolean) && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
             </div>
+
         );
     };
 
@@ -288,16 +304,20 @@ const [positions, setPositions] = useState(items.map((_, i) => ({ x: 80 + i * 80
         };
 
         return (
-            <div className="task-container">
-                <h3>משימה 5: תפוס את הכדור</h3>
-                <p>לחץ על הכדור ותפס אותו! ⚽ הכדור יזוז לכל מקום! 🎯</p>
-                <div
-                    className="moving-ball"
-                    style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
-                    onClick={handleClick}
-                ></div>
-                {caught && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
+            <div className='GamePage'>
+
+                <div className="task-container">
+                    <h3>משימה 5: תפוס את הכדור</h3>
+                    <p>לחץ על הכדור ותפס אותו! ⚽ הכדור יזוז לכל מקום! 🎯</p>
+                    <div
+                        className="moving-ball"
+                        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+                        onClick={handleClick}
+                    ></div>
+                    {caught && <button className="nav-btn" onClick={handleNext}>הבא⬅️</button>}
+                </div>
             </div>
+
         );
     };
 
